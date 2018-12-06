@@ -7,7 +7,7 @@ export default class QueryParser {
     query = '(';
     for (let i = 0, length = data.rules.length; i < length; i += 1) {
       if (!data.rules[i].combinator) {
-        query += `${data.rules[i].field} ${data.rules[i].operator} '${data.rules[i].value}'`;
+        query += `${data.rules[i].value}`;
         if (i !== length - 1 && !data.rules[i + 1].combinator) {
           query += ` ${data.combinator} `;
         }
@@ -18,9 +18,9 @@ export default class QueryParser {
     return `${query})`;
   }
 
-  static parseToData(query, config) {
+  static parseToData(query, config, fields) {
     const data = null;
-    const tokens = this.getTokensArray(query, config.combinators, config.operators);
+    const tokens = this.getTokensArray(query, config.combinators);
     const asTree = ASTree.buildTree(tokens, config.combinators);
     return this.convertSyntaxTreeToData(asTree, data, config.combinators, '1', '1');
   }
@@ -45,7 +45,6 @@ export default class QueryParser {
     } else if (element.value && element.value.field) {
       const newRule = {
         field: element.value.field,
-        operator: element.value.operator,
         value: element.value.value,
         nodeName,
       };
@@ -57,7 +56,7 @@ export default class QueryParser {
     return data;
   }
 
-  static getTokensArray(query, combinators, operators) {
+  static getTokensArray(query, combinators) {
     const combinatorsIndexes = this.getCombinatorsIndexes(query, combinators);
     const tokens = [];
     let token = '';
@@ -65,11 +64,11 @@ export default class QueryParser {
       const combinatorIndexes = combinatorsIndexes.find(x => x.start === i);
       if (combinatorIndexes) {
         const combinator = query.substring(combinatorIndexes.start, combinatorIndexes.end);
-        token = this.pushTokenIfNotEmpty(token, tokens, operators);
+        token = this.pushTokenIfNotEmpty(token, tokens);
         tokens.push(combinator);
         i = combinatorIndexes.end;
       } else if (query[i] === '(' || query[i] === ')') {
-        token = this.pushTokenIfNotEmpty(token, tokens, operators);
+        token = this.pushTokenIfNotEmpty(token, tokens);
         tokens.push(query[i]);
       } else {
         token += query[i];
@@ -78,24 +77,27 @@ export default class QueryParser {
     return tokens;
   }
 
-  static pushTokenIfNotEmpty(token, array, operators) {
+  static pushTokenIfNotEmpty(token, array) {
     token = token.trim();
     if (token) {
-      array.push(this.createTokenObject(token, operators));
+      array.push(this.createTokenObject(token));
     }
     return '';
   }
 
-  static createTokenObject(token, operators) {
-    const operatorsPattern = this.getSearchPattern(operators, 'operator');
-    const matches = this.matchAll(token, operatorsPattern);
-    const mathesLength = matches.map(el => el.value).join('').length;
-    const operatorEndIndex = matches[0].index + mathesLength;
-    return {
-      field: token.substring(0, matches[0].index).trim(),
-      operator: token.substring(matches[0].index, operatorEndIndex),
-      value: token.substring(operatorEndIndex, token.length).replace(/[']+/g, '').trim(),
-    };
+  static createTokenObject(token) {
+    if (token.startsWith("_") && token.endsWith("_")) {
+      return {
+        field: "predefined",
+        value: token
+      }
+    }
+    else {
+      return {
+        field: "terms",
+        value: token
+      }
+    }
   }
 
   static matchAll(str, regex) {

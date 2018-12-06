@@ -24,9 +24,9 @@ class Condition extends React.Component {
     const nodeName = this.treeHelper.generateNodeName(this.state.data);
     data.rules.push({
       field: this.props.fields[0].name,
-      operator: this.props.config.operators[0].operator,
       value: '',
-      nodeName });
+      nodeName
+    });
     this.setState({ data });
     this.props.onChange(this.props.data);
   }
@@ -37,7 +37,8 @@ class Condition extends React.Component {
     data.rules.push({
       combinator: this.props.config.combinators[0].combinator,
       nodeName,
-      rules: [] });
+      rules: []
+    });
     this.setState({ data });
     this.props.onChange(this.props.data);
   }
@@ -92,7 +93,6 @@ class Condition extends React.Component {
                 key={index}
                 buttonsText={this.props.buttonsText}
                 fields={this.props.fields}
-                operators={this.props.config.operators}
                 nodeName={rule.nodeName}
                 data={this.props.data}
                 onChange={this.handleChildUpdate}
