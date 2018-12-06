@@ -6,7 +6,7 @@ Biggest differences between the original and this fork: no error checking, no op
 
 No 3rd party libraries.
 
-![image](https://github.com/ItIsJustChad/react-two-way-querybuilder/blob/master/blob/builder.jpg)
+![image](https://github.com/ItsJustChad/react-two-way-querybuilder/blob/master/blob/builder.jpg)
 
 ## Installing
 
